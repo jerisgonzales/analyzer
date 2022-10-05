@@ -1,100 +1,86 @@
-#include <iostream>
-#include <cmath>
+
 #include "StringData.h"
-using namespace std;
-int linear_search(std::vector<std::string> container, std::string element){
-    for(int x=0; x < sizeof(container); x++){
-        if(container[x]==element){
-            return x;
-        }
+
+inline float nano_sec_to_sec(long long nano_sec)
+{
+    float conversion = 1.0f/(1000000000);
+    return nano_sec*conversion;
+}
+
+int linear_search(std::vector<std::string> raw_data, std::string desired_data)
+{
+    for(int idx = 0;
+        idx < raw_data.size();
+        idx++)
+    {
+        if(raw_data[idx] == desired_data)
+            return idx;
     }
+    
     return -1;
 }
 
-int binary_search(std::vector<std::string> container, std::string element){
-    int minIndex = 0;
-    int maxIndex = sizeof(container);
-    int midIndex;
-
-    while(minIndex<=maxIndex){
-        midIndex = minIndex + floor((maxIndex - minIndex) / 2);
-        if (container[midIndex] == element){
-            return midIndex;
+int binary_search(std::vector<std::string> raw_data,
+                  std::string desired_data)
+{
+    int mid = 0;
+    int start = 0;
+    int end = raw_data.size()-1;
+    
+    while(start <= end)
+    {
+        mid = start + (end-start)/2;
+        if(raw_data[mid] == desired_data)
+            return mid;
+        else if(raw_data[mid] > desired_data)
+        {
+            end = mid-1;
         }
-        else if (container[midIndex] > element) {
-            maxIndex = midIndex - 1;
+        else
+        {
+            start = mid+1;
         }
-        else if (container[midIndex] < element){
-            minIndex = midIndex + 1;
-        }
-
     }
+    
     return -1;
 }
 
-int main() {
-    std::vector<std::string> data = getStringData();
+void profile_binary_search(std::vector<std::string> raw_data,
+                           std::string desired_data)
+{
+    long long start = systemTimeNanoseconds();
+    int idx = binary_search(raw_data, desired_data);
+    long long end = systemTimeNanoseconds();
+    
+    float time = nano_sec_to_sec(end-start);
+    
+    std::cout << "binary_search: Took " << time << " seconds to find \"" << desired_data << "\" at index " << idx << "\n";
+}
 
-    cout << "Linear Search for 'not_here': \n";
-    long initialTime = systemTimeNanoseconds()/1000000000;
-    cout << "The index of the linear search is:";
-    int LinearSearch1 = linear_search(data, "not_here");
-    cout <<LinearSearch1;
-    long finalTime = systemTimeNanoseconds()/1000000000;
-    long timeElapsed = initialTime-finalTime;
-    cout << "\nTime elapsed:";
-    cout << timeElapsed;
-    cout << "\nBinary Search for 'not_here':";
-    initialTime = systemTimeNanoseconds()/1000000000;
-    cout << "\nThe index of the binary search is:";
-    int BinarySearch1 = binary_search(data, "not_here");
-    cout <<BinarySearch1;
-    finalTime = systemTimeNanoseconds()/1000000000;
-    timeElapsed = initialTime-finalTime;
-    cout << "\nTime elapsed:";
-    cout << timeElapsed;
+void profile_linear_search(std::vector<std::string> raw_data,
+                           std::string desired_data)
+{
+    long long start = systemTimeNanoseconds();
+    int idx = linear_search(raw_data, desired_data);
+    long long end = systemTimeNanoseconds();
+    
+    float time = nano_sec_to_sec(end-start);
+    
+    std::cout << "linear_search: Took " << time << " seconds to find \"" << desired_data << "\" at index " << idx << "\n";
+}
 
-    cout << "\n\nLinear Search for 'mzzzz': \n";
-    initialTime = systemTimeNanoseconds()/1000000000;
-    cout << "The index of the linear search is:";
-    int LinearSearch2 = linear_search(data, "zzzzz");
-    cout <<LinearSearch2;
-    finalTime = systemTimeNanoseconds()/1000000000;
-    timeElapsed = initialTime-finalTime;
-    cout << "\nTime elapsed:";
-    cout << timeElapsed;
-    cout << "\nBinary Search for 'zzzzz':";
-    initialTime = systemTimeNanoseconds()/1000000000;
-    cout << "\nThe index of the binary search is:";
-    int BinarySearch2 = binary_search(data, "zzzzz");
-    cout <<BinarySearch2;
-    finalTime = systemTimeNanoseconds()/1000000000;
-    timeElapsed = initialTime-finalTime;
-    cout << "\nTime elapsed:";
-    cout << timeElapsed;
-
-    cout << "\n\nLinear Search for 'aaaaa': \n";
-    initialTime = systemTimeNanoseconds()/1000000000;
-    cout << "The index of the linear search is:";
-    LinearSearch1 = linear_search(data, "aaaaa");
-    cout <<LinearSearch1;
-    finalTime = systemTimeNanoseconds()/1000000000;
-    timeElapsed = initialTime-finalTime;
-    cout << "\nTime elapsed:";
-    cout << timeElapsed;
-    cout << "\nBinary Search for 'not_here':";
-    initialTime = systemTimeNanoseconds()/1000000000;
-    cout << "\nThe index of the binary search is:";
-    BinarySearch1 = binary_search(data, "aaaaa");
-    cout <<BinarySearch1;
-    finalTime = systemTimeNanoseconds()/1000000000;
-    timeElapsed = initialTime-finalTime;
-    cout << "\nTime elapsed:";
-    cout << timeElapsed;
-
-
-
-
+int main() 
+{
+    std::vector<std::string> string_data = getStringData();
+    
+    profile_binary_search(string_data, "not_here");
+    profile_linear_search(string_data, "not_here");
+    
+    profile_binary_search(string_data, "mzzzz");
+    profile_linear_search(string_data, "mzzzz");
+    
+    profile_binary_search(string_data, "aaaaa");
+    profile_linear_search(string_data, "aaaaa");
+    
     return 0;
 }
-
