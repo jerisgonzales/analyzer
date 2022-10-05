@@ -1,86 +1,94 @@
-
+#include <iostream>
+#include <string>
+#include <vector>
 #include "StringData.h"
 
-inline float nano_sec_to_sec(long long nano_sec)
+int binarySearch(std::vector <std::string> searchList, std::string target);
+int linearSearch(std::vector <std::string> searchList, std::string target);
+
+int main()
 {
-    float conversion = 1.0f/(1000000000);
-    return nano_sec*conversion;
+    std::vector<std::string> searchList = getStringData();
+    std::string phrase = "aaaaa";
+    float start = systemTimeNanoseconds() / 1000000000.0f;
+    int indexFound = binarySearch(searchList, phrase);
+    float end = systemTimeNanoseconds() / (float)1000000000;
+    float time = end - start;
+    std::cout << "binary search data: phrase = " << phrase << ", index of phrase = " << indexFound << ", time = " << time << "\n";
+
+    phrase = "mzzzz";
+    start = systemTimeNanoseconds() / 1000000000.0f;
+    indexFound = binarySearch(searchList, phrase);
+    end = systemTimeNanoseconds() / (float)1000000000;
+    time = end - start;
+    std::cout << "binary search data: phrase = " << phrase << ", index of phrase = " << indexFound << ", time = " << time << "\n";
+
+    phrase = "not_here";
+    start = systemTimeNanoseconds() / 1000000000.0f;
+    indexFound = binarySearch(searchList, phrase);
+    end = systemTimeNanoseconds() / (float)1000000000;
+    time = end - start;
+    std::cout << "binary search data: phrase = " << phrase << ", index of phrase = " << indexFound << ", time = " << time << "\n\n";
+
+    phrase = "aaaaa";
+    start = systemTimeNanoseconds() / 1000000000.0f;
+    indexFound = binarySearch(searchList, phrase);
+    end = systemTimeNanoseconds() / (float)1000000000;
+    time = end - start;
+    std::cout << "linear search data: phrase = " << phrase << ", index of phrase = " << indexFound << ", time = " << time << "\n";
+
+    phrase = "mzzzz";
+    start = systemTimeNanoseconds() / 1000000000.0f;
+    indexFound = binarySearch(searchList, phrase);
+    end = systemTimeNanoseconds() / (float)1000000000;
+    time = end - start;
+    std::cout << "linear search data: phrase = " << phrase << ", index of phrase = " << indexFound << ", time = " << time << "\n";
+
+    phrase = "not_here";
+    start = systemTimeNanoseconds() / 1000000000.0f;
+    indexFound = binarySearch(searchList, phrase);
+    end = systemTimeNanoseconds() / (float)1000000000;
+    time = end - start;
+    std::cout << "linear search data: phrase = " << phrase << ", index of phrase = " << indexFound << ", time = " << time << "\n";
+    return 0;
 }
 
-int linear_search(std::vector<std::string> raw_data, std::string desired_data)
+int binarySearch(std::vector <std::string> searchList, std::string target)
 {
-    for(int idx = 0;
-        idx < raw_data.size();
-        idx++)
+    int low_index = 0;
+    int high_index = searchList.size() - 1;
+    /* Loops until the value is found */
+    while (low_index <= high_index)
     {
-        if(raw_data[idx] == desired_data)
-            return idx;
-    }
-    
-    return -1;
-}
-
-int binary_search(std::vector<std::string> raw_data,
-                  std::string desired_data)
-{
-    int mid = 0;
-    int start = 0;
-    int end = raw_data.size()-1;
-    
-    while(start <= end)
-    {
-        mid = start + (end-start)/2;
-        if(raw_data[mid] == desired_data)
-            return mid;
-        else if(raw_data[mid] > desired_data)
+        int mid_index = low_index + (high_index - low_index) / 2;
+        if (searchList[mid_index] == target)
         {
-            end = mid-1;
+            return mid_index;
+        }
+        else if (target > searchList[mid_index])
+        {
+            low_index = mid_index+1;
         }
         else
         {
-            start = mid+1;
+            high_index = mid_index - 1;
         }
     }
-    
+    return -1;  /* If the value is not found the function returns -1 */
+}
+
+int linearSearch(std::vector <std::string> searchList, std::string target)
+{
+    /* Takes the tuple and target value as input */
+    /*  Searches linearly through the tuple */
+    for (int index = 0; index < searchList.size(); ++index)
+    {
+        /*  Compares the tuple value to the target value */
+        if (searchList[index] == target)
+        {
+            return index;
+        }
+    }
     return -1;
 }
 
-void profile_binary_search(std::vector<std::string> raw_data,
-                           std::string desired_data)
-{
-    long long start = systemTimeNanoseconds();
-    int idx = binary_search(raw_data, desired_data);
-    long long end = systemTimeNanoseconds();
-    
-    float time = nano_sec_to_sec(end-start);
-    
-    std::cout << "binary_search: Took " << time << " seconds to find \"" << desired_data << "\" at index " << idx << "\n";
-}
-
-void profile_linear_search(std::vector<std::string> raw_data,
-                           std::string desired_data)
-{
-    long long start = systemTimeNanoseconds();
-    int idx = linear_search(raw_data, desired_data);
-    long long end = systemTimeNanoseconds();
-    
-    float time = nano_sec_to_sec(end-start);
-    
-    std::cout << "linear_search: Took " << time << " seconds to find \"" << desired_data << "\" at index " << idx << "\n";
-}
-
-int main() 
-{
-    std::vector<std::string> string_data = getStringData();
-    
-    profile_binary_search(string_data, "not_here");
-    profile_linear_search(string_data, "not_here");
-    
-    profile_binary_search(string_data, "mzzzz");
-    profile_linear_search(string_data, "mzzzz");
-    
-    profile_binary_search(string_data, "aaaaa");
-    profile_linear_search(string_data, "aaaaa");
-    
-    return 0;
-}
